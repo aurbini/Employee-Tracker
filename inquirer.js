@@ -25,11 +25,9 @@ outPut();
 async function outPut(){
   const { results } = await db.query({
     sql:
-    "SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary, department.dep_name FROM employee LEFT JOIN role ON employee.role_id = role.id JOIN department ON role.id = department.id"
+    "SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary, department.dep_name, employee.manager FROM employee LEFT JOIN role ON employee.role_id = role.id JOIN department ON role.id = department.id"
   })
-  results.forEach(({  id, first_name, last_name, title, salary, dep_name }) => {
-    console.log(`id: ${id} || FirstName: ${first_name} || lastName: ${last_name} || title: ${title} || salary: ${salary} || department: ${dep_name}`);
-  })
+    console.table(results); 
   userInput(); 
 }
 //INITIATE THE PROMPT FOR USER INPUT 
@@ -86,7 +84,7 @@ async function adddepartment(){
     sql:
       `INSERT INTO department(dep_name) VALUES ('${department}')` 
   })
-  console.log(results); 
+ // console.log(results); 
   outPut(); 
 } 
 //ADD ROLE
@@ -115,16 +113,16 @@ async function addRole(){
 //ADD EMPLOYEE 
 //==========================================================================
 async function addEmployee(){
+  //GRAB THE LIST OF ROLES FROM DATABASE
   const queryRoles  = await db.query({
     sql:  "SELECT title FROM role"
   })
-  console.log(queryRoles.results); 
+  //console.log(queryRoles.results); 
   let roles = []; 
   queryRoles.results.forEach(name=> {
     roles.push(name.title)
   })
-  console.log(roles); 
-
+  //PROMPT USER FOR INPUT 
   const { firstName, lastName, role, manager } = await inquirer.prompt([
     {
       type: 'input',
@@ -145,14 +143,13 @@ async function addEmployee(){
       name: 'manager',
     }
   ])
-
   //FIND THE ROLEID FOR THE NEW ROLE 
   const { results } = await db.query({
     sql:
       `SELECT id FROM role WHERE title = "${role}"` 
     })
     let id = results[0].id
-   // console.log(results[0].id);
+   //INSERT INTO DATABASE THE NEW EMPLOYEE INFORMATION
   const query = await db.query({
     sql: 
      `INSERT INTO employee(first_name, last_name, role_id, manager ) VALUES ('${firstName}', '${lastName}', ${id},  '${manager}')`
@@ -167,9 +164,7 @@ async function viewEmployees(){
     sql: "SELECT employee.id, employee.first_name, employee.last_name FROM employee"
 
   })
-  results.forEach(({  id, first_name, last_name }) => {
-    console.log(`id: ${id} || FirstName: ${first_name} || LastName: ${last_name}`)
-  })
+  console.table(results); 
   userInput(); 
 }
 //VIEW DEPARTMENT 
@@ -179,9 +174,7 @@ async function viewDep(){
     sql:   "SELECT id, dep_name FROM department"
 
   })
-  results.forEach(({ id, dep_name}) => {
-    console.log(`id: ${id} || Department: ${dep_name}`)
-  })
+  console.table(results); 
   userInput(); 
 }
 //VIEW ALL ROLES 
@@ -192,11 +185,8 @@ async function viewRoles(){
     sql:
       "SELECT id, title, salary FROM role"
   })  
-    console.log('id   ','Role:          ',  'salary        ')
-      console.log('____','______________', '____________')
-    results.forEach(({  id, title, salary}) => {
-      console.log(`${id} | ${title}       | ${salary}    `)
-    })
+
+  console.table(results); 
   userInput(); 
 }
 //UPDATE EMPLOYEES 
