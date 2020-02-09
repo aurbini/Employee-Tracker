@@ -5,7 +5,7 @@ USE employees;
 
 CREATE TABLE department (
   id INTEGER(4) NOT NULL AUTO_INCREMENT,
-  name VARCHAR(30) NOT NULL,
+  dep_name VARCHAR(30) NOT NULL,
   PRIMARY KEY(id)
 );
 CREATE TABLE role(
@@ -29,7 +29,7 @@ CREATE TABLE employee(
 -- )
 
 
-INSERT INTO department (name) 
+INSERT INTO department (dep_name) 
 VALUES ("warehouse"), ("accounting"), ("law"), ('engineering');
 
 INSERT INTO role (title, salary, department_id)
