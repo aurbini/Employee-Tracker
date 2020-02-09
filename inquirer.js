@@ -115,6 +115,16 @@ async function addRole(){
 //ADD EMPLOYEE 
 //==========================================================================
 async function addEmployee(){
+  const queryRoles  = await db.query({
+    sql:  "SELECT title FROM role"
+  })
+  console.log(queryRoles.results); 
+  let roles = []; 
+  queryRoles.results.forEach(name=> {
+    roles.push(name.title)
+  })
+  console.log(roles); 
+
   const { firstName, lastName, role, manager } = await inquirer.prompt([
     {
       type: 'input',
@@ -125,8 +135,9 @@ async function addEmployee(){
       message: 'What is the last name',
       name: 'lastName',
     }, {
-      type: 'input',
+      type: 'list',
       message: 'What is the role',
+      choices: roles,
       name: 'role',
     }, {
       type: 'input',
@@ -134,6 +145,8 @@ async function addEmployee(){
       name: 'manager',
     }
   ])
+
+  //FIND THE ROLEID FOR THE NEW ROLE 
   const { results } = await db.query({
     sql:
       `SELECT id FROM role WHERE title = "${role}"` 
@@ -239,8 +252,3 @@ async function updateEmpRole(){
 function endConnection(){
   db.end(); 
 }
-
-// const { results } = await db.query({
-//   sql:
-  
-// })
