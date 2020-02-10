@@ -1,6 +1,7 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 const { MySQL } = require('mysql-promisify'); 
+const ctable = require('console.table'); 
 //============================================================================
 
 const questions = [
@@ -18,18 +19,8 @@ var db = new MySQL({
   password: "Theoffice92",
   database: "employees"
 })
-//OUTPUT DATABASE
-//============================================================================
 
-outPut();  
-async function outPut(){
-  const { results } = await db.query({
-    sql:
-    "SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary, department.dep_name, employee.manager FROM employee LEFT JOIN role ON employee.role_id = role.id JOIN department ON role.id = department.id"
-  })
-    console.table(results); 
-  userInput(); 
-}
+//============================================================================
 //INITIATE THE PROMPT FOR USER INPUT 
 //============================================================================
 
@@ -85,7 +76,7 @@ async function adddepartment(){
       `INSERT INTO department(dep_name) VALUES ('${department}')` 
   })
  // console.log(results); 
-  outPut(); 
+  userInput(); 
 } 
 //ADD ROLE
 //==========================================================================
@@ -109,6 +100,7 @@ async function addRole(){
     sql:
     `INSERT INTO role(title, salary, department_id) VALUES ('${role}', '${salary}', '${depID}')`
   })
+  userInput(); 
 }
 //ADD EMPLOYEE 
 //==========================================================================
@@ -117,6 +109,15 @@ async function addEmployee(){
   const queryRoles  = await db.query({
     sql:  "SELECT title FROM role"
   })
+  const queryManagers = await db.query({
+    sql: "SELECT first_name, last_name FROM employee WHERE manager_id IS NULL"
+  })
+  let managers = [];
+
+  queryManagers.results.forEach(({ first_name, last_name }) => {
+    managers.push(first_name + " " + last_name); 
+  })
+  //console.log(managers); 
   //console.log(queryRoles.results); 
   let roles = []; 
   queryRoles.results.forEach(name=> {
@@ -138,11 +139,19 @@ async function addEmployee(){
       choices: roles,
       name: 'role',
     }, {
-      type: 'input',
+      type: 'list',
       message: 'Who is the manager',
       name: 'manager',
+      choices: managers
     }
   ])
+  managerName = manager.split(' '); 
+  //FIND THE MANAGER ID FOR THE FIRST,LAST NAME OF MANAGER CHOSEN 
+  const queryID = await db.query({
+    sql:
+      `SELECT id FROM employee WHERE first_name ="${managerName[0]}" AND last_name="${managerName[1]}"` 
+    })
+  let managerid = queryID.results[0].id
   //FIND THE ROLEID FOR THE NEW ROLE 
   const { results } = await db.query({
     sql:
@@ -152,17 +161,17 @@ async function addEmployee(){
    //INSERT INTO DATABASE THE NEW EMPLOYEE INFORMATION
   const query = await db.query({
     sql: 
-     `INSERT INTO employee(first_name, last_name, role_id, manager ) VALUES ('${firstName}', '${lastName}', ${id},  '${manager}')`
+     `INSERT INTO employee(first_name, last_name, role_id, manager_id ) VALUES ('${firstName}', '${lastName}', ${id},  '${managerid}')`
   })
-  outPut(); 
+  userInput(); 
 }
 //VIEW FUNCTIONS
 //VIEW EMPLOYEE
 //===========================================================================
 async function viewEmployees(){
-  const {results } = await db.query({
-    sql: "SELECT employee.id, employee.first_name, employee.last_name FROM employee"
-
+  const { results } = await db.query({
+    sql:
+    "SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary, department.dep_name FROM employee LEFT JOIN role ON employee.role_id = role.id JOIN department ON role.id = department.id"
   })
   console.table(results); 
   userInput(); 
@@ -236,9 +245,13 @@ async function updateEmpRole(){
     const update = await db.query({
       sql: `UPDATE employee SET role_id= '${roleID}' WHERE first_name ='${employeeNameArray[0]}' AND last_name ='${employeeNameArray[1]}';`
     });
+  userInput(); 
 }
  //END CONNECTION 
  //============================================================================
 function endConnection(){
   db.end(); 
 }
+
+//START THE PROMPT
+userInput(); 

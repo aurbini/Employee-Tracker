@@ -20,7 +20,7 @@ CREATE TABLE employee(
   first_name VARCHAR(45) NOT NULL,
   last_name VARCHAR(10) NOT NULL,
   role_id INTEGER,
-  manager VARCHAR(30) DEFAULT NULL,
+  manager_id INTEGER(4) DEFAULT NULL,
   PRIMARY KEY (id)
 );
 
@@ -36,7 +36,7 @@ INSERT INTO role (title, salary, department_id)
 VALUES('engineer', 90000,4), ('stock', 40000, 1),('accountant', 70000, 2), ('lawyer', 100000, 3);
 
 INSERT INTO employee (first_name, last_name, role_id, manager) 
-VALUES('luke', 'skywalker', 3, 'nick '), ('rick', 'dolton', 2 'null'), ('stacy', 'mathews', 1, 'rick rubin'), ('kim', 'smith', 5, 'jenny ');
+VALUES('luke', 'skywalker', 3, 4), ('rick', 'dolton', 2, ), ('stacy', 'mathews', 1, 4) ('kim', 'smith', 5, 2 );
 
 SELECT * FROM department;
 SELECT * FROM role;

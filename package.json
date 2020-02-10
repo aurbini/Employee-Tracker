@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/aurbini/Employee-Tracker#readme",
   "dependencies": {
+    "console.table": "^0.10.0",
     "inquirer": "^7.0.4",
     "mysql": "^2.18.1",
     "mysql-promisify": "^1.0.1",
